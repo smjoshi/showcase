@@ -1,0 +1,144 @@
+package com.cs.dms.service.impl;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+
+import com.cs.dms.dao.entity.ProductDocConfEntity;
+import com.cs.dms.dao.exception.DMSDaoException;
+import com.cs.dms.dao.intf.ProductDocConfDao;
+import com.cs.dms.service.domain.model.ProductDocConfiguration;
+import com.cs.dms.service.exception.DMSException;
+import com.cs.dms.service.intf.ProductDocConfService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+/**
+ * @author SJoshi
+ *
+ */
+
+@Service("confService")
+public class ProductDocConfServiceImpl implements ProductDocConfService {
+
+	@Autowired
+	private ProductDocConfDao productDocConfDao = null;
+
+	private static final Logger logger = LoggerFactory.getLogger(ProductDocConfServiceImpl.class);
+	
+	@Override
+	public ProductDocConfiguration upsertProductDocConfiguration(
+			ProductDocConfiguration pdc) throws DMSException {
+
+		ProductDocConfiguration processedConf = null;
+		if (pdc != null){
+			ProductDocConfEntity confEntity = prepareDocConfEntity(pdc);
+			try {
+				if (confEntity.getProductDocConfId() == null){
+					confEntity = productDocConfDao.create(confEntity);
+				}else
+				{
+					productDocConfDao.update(confEntity);
+				}
+				processedConf = populateDocConfModel(confEntity);
+			} catch (DMSDaoException e) {
+				e.printStackTrace();
+				throw new DMSException();
+			}
+		}
+		return processedConf;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.dc.dms.ProductDocConfService#getProductDocConfiguration(java.math.BigInteger)
+	 */
+	@Override
+	public List<ProductDocConfiguration> getProductDocConfigurations(
+			BigInteger productId) throws DMSException {
+
+		logger.debug("{componentName:ProductDocConfServiceImpl, methodName:getProductDocConfigurations, parameters{productId.toString()}}");
+		List<ProductDocConfEntity> docConfs = productDocConfDao.getProductDocConfigurations(productId);
+		logger.debug("{componentName:ProductDocConfServiceImpl, methodName:getProductDocConfigurations, configurationCount:" + docConfs.size());
+		return populateModelList(docConfs);
+	}
+	
+	
+	@Override
+	public List<ProductDocConfiguration> upsertProductDocConfigurationsList(List<ProductDocConfiguration> confs)
+			throws DMSException {
+		
+		List<ProductDocConfiguration> processedConfs = new ArrayList();
+		
+		ProductDocConfiguration processedConf = null;
+		for(ProductDocConfiguration conf : confs){
+			
+			try {
+				processedConf = upsertProductDocConfiguration(conf);
+				processedConfs.add(processedConf);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return processedConfs;
+	}
+	
+	
+	/**
+	 * @param docConf
+	 * @return
+	 */
+	private ProductDocConfEntity prepareDocConfEntity(ProductDocConfiguration docConf){
+		ProductDocConfEntity docConfEntity = new ProductDocConfEntity();
+		
+		if (docConf != null){
+			docConfEntity.setProductDocConfId(docConf.getDocConfId());
+			docConfEntity.setProductId(docConf.getProductId());
+			docConfEntity.setDocTypeCode(docConf.getDocTypeCode());
+			docConfEntity.setMandatory(docConf.isMandatory());
+
+			docConfEntity.setGrouPId(docConf.getGroupId());
+			docConfEntity.setDescription(docConf.getDescription());
+		}
+
+		return docConfEntity;
+		
+	}
+	
+	
+	private ProductDocConfiguration populateDocConfModel(ProductDocConfEntity prodDocEntity){
+
+		ProductDocConfiguration docConf = new ProductDocConfiguration();
+		if (prodDocEntity != null){
+			docConf.setDocConfId(prodDocEntity.getProductDocConfId());
+			docConf.setProductId(prodDocEntity.getProductId());
+			docConf.setDocTypeCode(prodDocEntity.getDocTypeCode());
+			docConf.setMandatory(prodDocEntity.isMandatory());
+			docConf.setGroupId(prodDocEntity.getGrouPId());
+			docConf.setDescription(prodDocEntity.getDescription());
+		}
+		return docConf;
+	}
+	
+	
+	
+	private List<ProductDocConfiguration> populateModelList(List<ProductDocConfEntity> docConfs){
+		
+		List<ProductDocConfiguration> confList = new ArrayList<ProductDocConfiguration>();
+		if (docConfs != null && !docConfs.isEmpty()){
+			for (ProductDocConfEntity docConf : docConfs){
+				confList.add(populateDocConfModel(docConf));
+			}
+		}
+		return confList;
+	}
+
+	
+
+}

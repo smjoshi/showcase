@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <if condition='isNull("log.output.dir")'>
+        <then>
+            <property name="log.output.dir" scope="context" value="." />
+        </then>
+    </if>
+
+    <conversionRule conversionWord="clr"
+                    converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex"
+                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%rEx{5} %clr(A:%X{auctionCode} V:%X{vin} %d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:-}){magenta}%clr(---){faint} %clr([%15.15t{14}]){faint}%clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wex</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="logFileAppender" class="ch.qos.logback.core.FileAppender">
+        <file>${log.output.dir}/application.log</file>
+        <append>true</append>
+        <encoder>
+            <charset>utf-8</charset>
+            <pattern>%date [%thread] %-5level A:%X{auctionCode} V:%X{vin} %logger{35} - %message %rEx{5} %n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.cs.dms" level="INFO" />
+
+    <springProfile name="uat, production">
+        <logger name="com.cs.dms" level="INFO" />
+    </springProfile>
+
+    <logger name="ch.qos.logback" level="warn" />
+
+    <logger name="org.springframework" level="DEBUG" />
+    <logger name="org.springframework.cloud" level="info" />
+
+    <logger name="org.apache" level="warn" />
+    <logger name="org.apache.camel" level="info" />
+    <logger name="com.amazonaws" level="info" />
+
+    <logger name="javax.activation" level="error" />
+    <logger name="javax.xml.bind" level="error" />
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <root level="${log.level}">
+        <!-- <if
+                condition='isNull("log.console.enabled") || !property("log.console.enabled").contains("false")'>
+            <then>
+                <appender-ref ref="CONSOLE" />
+            </then>
+        </if> -->
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="logFileAppender" />
+
+        <!-- Enable if using Loggly -->
+        <!--<appender-ref ref="syslogAppender"/> -->
+    </root>
+</configuration>
