@@ -11,12 +11,16 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import history from './index'
+import history from './index';
 
-
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import ApiHandler from './ApiHandler';
+import UserCtx from './UserContext';
+
+import {AppcontextConsumer} from'./AppContextProvider';
+
+
 
 class LoginDialog extends React.Component {
 
@@ -26,6 +30,7 @@ class LoginDialog extends React.Component {
         this.handleEmail = this.handleEmail.bind(this);
         this.handlePassword = this.handlePassword.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        
     }
 
     apiHandler = new ApiHandler();
@@ -33,7 +38,9 @@ class LoginDialog extends React.Component {
     public state = {
         open : false,
         email : "",
-        password : "",
+        password : "",  
+        userCtx: new UserCtx(),
+
     };
 
     public handleClickOpen = () => {
@@ -66,14 +73,12 @@ class LoginDialog extends React.Component {
                   ).then(res => (
                           alert("Success"),
                           console.log(res),
+                          this.setUserContext(res),
                           history.push("/home")
-                                                   
                         ))
                         .catch(function(error){
                             alert("Error while calling API");
                         });
-
-
 
     };
 
@@ -87,53 +92,72 @@ class LoginDialog extends React.Component {
         this.setState({
             password:  event.target.value,
         });
-    }
+    };
     
+    private setUserContext(res: AxiosResponse){
+        var  usrCx = new  UserCtx();
+        usrCx.name = res.data.firstName;
+        usrCx.userId = res.data.userId;
+        usrCx.loggedIn = true;
+        alert ("updated context in login dialog"); 
+        this.setState({
+            userCtx: usrCx,
+        });
+    };
+
+
     public  render() {
+            
             return (
-              <div>
-                <Button onClick={this.handleClickOpen} color="inherit">Login</Button>
-                <Dialog
-                  open={this.state.open}
-                  onClose={this.handleClose}
-                  aria-labelledby="login-dialog-title"
-                >
-                <DialogTitle id="login-dialog-title">Login</DialogTitle>
-                <DialogContent>
-                <DialogContentText>
-                    Login with Email Id / User Id
-                </DialogContentText>
-                <TextField
-                    autoFocus={true}
-                    margin="dense"
-                    id="name"
-                    label="E-mail/User Id"
-                    type="text"
-                    fullWidth={true}
-                    onChange={this.handleEmail} 
-                />
-                <TextField
-                    autoFocus={true}
-                    margin="dense"
-                    id="password"
-                    label="Password"
-                    type="password"
-                    fullWidth={true}
-                    onChange={this.handlePassword} 
-                />
-                </DialogContent>
-                <DialogActions>
-                <Button onClick={this.handleClose} color="primary">
-                    Cancel
-                </Button>
-                <Button onClick={this.handleSubmit} color="primary">
-                    Login
-                </Button>
-                </DialogActions>
-            </Dialog>
-            </div>
-            );
-          }
+                <AppcontextConsumer>
+                        {(userContext) => (userContext.updateUserInfo(this.state.userCtx),
+                <div>
+                    <Button onClick={this.handleClickOpen} color="inherit">Login</Button>
+                    <Dialog
+                    open={this.state.open}
+                    onClose={this.handleClose}
+                    aria-labelledby="login-dialog-title"
+                    >
+                    <DialogTitle id="login-dialog-title">Login</DialogTitle>
+                    <DialogContent>
+                    <DialogContentText>
+                        Login with Email Id / User Id
+                    </DialogContentText>
+                    <TextField
+                        autoFocus={true}
+                        margin="dense"
+                        id="name"
+                        label="E-mail/User Id"
+                        type="text"
+                        fullWidth={true}
+                        onChange={this.handleEmail} 
+                    />
+                    <TextField
+                        autoFocus={true}
+                        margin="dense"
+                        id="password"
+                        label="Password"
+                        type="password"
+                        fullWidth={true}
+                        onChange={this.handlePassword} 
+                    />
+                    </DialogContent>
+                    <DialogActions>
+                    <Button onClick={this.handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={this.handleSubmit} color="primary">
+                        Login
+                    </Button>
+                    </DialogActions>
+                </Dialog>
+            
+                </div>
+                        )}
+                </AppcontextConsumer>
+            
+            )}
+        
   }
 
   export default LoginDialog;

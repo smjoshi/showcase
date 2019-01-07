@@ -5,6 +5,8 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import TextField from '@material-ui/core/TextField';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
+import axios from 'axios';
+import { AppContext } from './AppContextProvider';
 
 
 
@@ -22,18 +24,80 @@ const styles = (theme: Theme ) => createStyles({
 });
 
 class OrgDetail extends React.Component<WithStyles<typeof styles>, {}> {
-
+    static contextType = AppContext;
+   
     state = {
         name: "",
-        orgs: [],
+        orgs: "",
+        orgId: "",
         isAdd: false,
         isEdit: false,
     }
 
-    handleChange = name => event => {
+
+    componentDidMount(){
+        alert(" In OrgDetail.componentDidMount");
+        OrgDetail.contextType = AppContext;
+        alert(this.context);
         this.setState({
-            [name]: event.target.value, 
+            name: this.context.userInfo.userId,
         });
+        
+        var userId = this.context.userInfo.userId;
+        axios.get("http://localhost:5000/api/orgs/user/"+userId).then(res => {
+            var orgId = res.data[0].orgId;
+            alert("orgId : " +  orgId );
+            this.setState({
+                orgId: orgId,
+                orgs: res.data[0].orgName,
+            });
+        })
+    }
+
+    handleNameChange = (event) => {
+        this.setState({
+            name: event.target.value, 
+        });
+    }
+
+    handleOrgChange = (event) => {
+        this.setState({
+            orgs: event.target.value, 
+        });
+    }
+
+    handleOrgAdd = () => {
+        //TODO : validate Inputs
+
+        var org =  Object.create(null);
+        org.orgName = this.state.orgs;
+
+        org.userId = this.context.userInfo.userId; 
+        alert("User Id : " + org.userId);
+
+       // apiResponse = this.apiHandler.postCall("http://localhost:8080/api/users/login", user);
+       
+       
+       axios.post("http://localhost:5000/api/orgs/org", 
+                   JSON.stringify(org), 
+                   { headers : {
+                        'Content-Type' : 'application/json', 
+                        'Access-Control-Allow-Origin' : '*',
+                        withCredentials: true,
+                        credentials: 'same-origin'
+                        }
+
+                    }
+                  ).then(res => (
+                          alert("Success"),
+                          console.log(res),
+                          alert(res)
+                         
+                        ))
+                        .catch(function(error){
+                            alert("Error while calling API");
+                        });
+
     }
 
     private addOrg = () =>{
@@ -45,7 +109,7 @@ class OrgDetail extends React.Component<WithStyles<typeof styles>, {}> {
     }
 
     public render() {
-      const { classes } = this.props;
+     // const { classes } = this.props;
       let actionIcon;
 
       if (this.state.orgs.length > 0){
@@ -58,39 +122,80 @@ class OrgDetail extends React.Component<WithStyles<typeof styles>, {}> {
                     </Button>;
       }
 
-
       return (
-       
             <div className="OrgDetail">
-               
                 {actionIcon}
 
                {this.state.isAdd && (<div className="OrgForm" >
                     <form className="OrgDetailForm" noValidate autoComplete="off">
                         <TextField
-                            id="standard-name"
-                            className={classes.textField}
+                            autoFocus={true}
+                            id="orgName"
                             label="ORG Name"
                             value={this.state.name}
+                            onChange={this.handleNameChange}
                             margin="normal"
+                            type="text"
+                            //className={classes.textField}
+
                         />
                         <TextField
-                            id="OWNER-name"
-                            className={classes.textField}
+                             autoFocus={true}
+                            id="ownerName"
                             label="Owner Name"
-                            value={this.state.name}
+                            value={this.state.orgs}
+                            onChange={this.handleOrgChange}
                             margin="normal"
+                            type="text"
+                             //className={classes.textField}
                         />
+
+                        <Button onClick={this.handleOrgAdd} color="primary">
+                            Add
+                        </Button>
+
+                    </form>
+                </div>)}
+
+                {this.state.isEdit && (<div className="OrgForm" >
+                    <form className="OrgDetailForm" noValidate autoComplete="off">
+                        <TextField
+                            autoFocus={true}
+                            id="orgName"
+                            label="ORG Name"
+                            value={this.state.name}
+                            onChange={this.handleNameChange}
+                            margin="normal"
+                            type="text"
+                            //className={classes.textField}
+
+                        />
+                        <TextField
+                             autoFocus={true}
+                            id="ownerName"
+                            label="Owner Name"
+                            value={this.state.orgs}
+                            onChange={this.handleOrgChange}
+                            margin="normal"
+                            type="text"
+                             //className={classes.textField}
+                        />
+
+                        <Button onClick={this.handleOrgAdd} color="primary">
+                            Edit
+                        </Button>
 
                     </form>
                 </div>)}
                 
             </div>
-           
+            
       );
     }
   }
 
-
+//   export default props => (<AppContext.Consumer>
+//       {(context) => {return <OrgDetail {...props} userCtx={context.userInfo} />}}
+//   </AppContext.Consumer>)
  
   export default withStyles(styles)(OrgDetail);

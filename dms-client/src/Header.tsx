@@ -9,11 +9,13 @@ import RegisterDialog from './registerDialog';
 import logo from './logo.svg';
 
 import createHistory from 'history/createBrowserHistory';
+import {AppcontextConsumer} from'./AppContextProvider';
+
 export const history = createHistory();
 
 
 class Header extends React.Component{
-
+   
     public render() {
         return (
           <div className="App">
@@ -27,6 +29,12 @@ class Header extends React.Component{
                 <Grid alignItems="flex-end" direction="column" xs={1} item>
                     <RegisterDialog />
                 </Grid>
+                <Grid alignItems="flex-end" direction="column" xs={2} item>
+                    <AppcontextConsumer>
+                        {(usrCtx) => (<div>Welcome {usrCtx.userInfo.name}</div>)}
+                    </AppcontextConsumer>
+                </Grid>
+
               </Grid>
             </header>
           </div>
