@@ -19,20 +19,40 @@ const styles = (theme: Theme) => createStyles({
     media: {
       // ⚠️ object-fit is not supported by IE11.
       objectFit: 'cover',
-    },
+    }
+    
   });
-  
 
+interface Props extends WithStyles<typeof styles> {
+    header: string,
+    imageUrl: string,
+    section: string
+};
 
-class Homecard extends React.Component<WithStyles<typeof styles>, {}>{
+interface State {
+    sectiondetail : string
+};
+
+class Homecard extends React.Component<Props , State>{
 
    constructor(props){
        super(props);
+       this.setState({sectiondetail : this.props.section});
        this.handleClick = this.handleClick.bind(this);
    }
 
+   public componentDidMount(){
+    this.setState({sectiondetail : this.props.section});
+   }
+
    handleClick(){
-       history.push("/org");
+      
+       if (this.state.sectiondetail == "Manage Organization")
+            history.push("/org");
+        else if (this.state.sectiondetail == "Product Configuration")
+            history.push("/product");
+        else if (this.state.sectiondetail == "Product Documents")
+            history.push("/documents");
    }
    
     render(){
@@ -49,17 +69,14 @@ class Homecard extends React.Component<WithStyles<typeof styles>, {}>{
                 />
                 <CardContent>
                     <Typography gutterBottom variant="headline" component="h2">
-                        Lizard
+                        {this.props.header}
                     </Typography>
                     
                 </CardContent>
             
                 <CardActions>
-                    <Button size="small" color="primary">
-                    Share
-                    </Button>
                     <Button size="small" color="primary" onClick={this.handleClick}>
-                    Learn More
+                        Learn More
                     </Button>
                 </CardActions>
             </Card>

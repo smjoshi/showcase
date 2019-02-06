@@ -19,6 +19,7 @@ import ApiHandler from './ApiHandler';
 import UserCtx from './UserContext';
 
 import {AppcontextConsumer} from'./AppContextProvider';
+import * as appConstant from './AppConstants';
 
 
 
@@ -30,6 +31,7 @@ class LoginDialog extends React.Component {
         this.handleEmail = this.handleEmail.bind(this);
         this.handlePassword = this.handlePassword.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.updateUserContextWithOrgId = this.updateUserContextWithOrgId.bind(this);
         
     }
 
@@ -60,7 +62,7 @@ class LoginDialog extends React.Component {
        // apiResponse = this.apiHandler.postCall("http://localhost:8080/api/users/login", user);
        
        
-       axios.post("http://localhost:5000/api/users/login", 
+       axios.post(appConstant.API_URL+"/users/login", 
                    JSON.stringify(user), 
                    { headers : {
                         'Content-Type' : 'application/json', 
@@ -93,16 +95,40 @@ class LoginDialog extends React.Component {
             password:  event.target.value,
         });
     };
+
+
+    private updateUserContextWithOrgId(userCx: UserCtx) {
+            alert("retrieving org information");
+            axios.get(appConstant.API_URL+"/orgs/user/"+userCx.userId).then(res => {
+                var orgId = res.data[0].orgId;
+
+                alert("Org id set in context : " + orgId)
+                userCx.orgId = orgId;
+                this.setState({
+                    userCtx: userCx,
+                });
+           
+            })
+            .catch((error) => {
+                alert(error);
+            } )
+    }
     
     private setUserContext(res: AxiosResponse){
+
         var  usrCx = new  UserCtx();
         usrCx.name = res.data.firstName;
         usrCx.userId = res.data.userId;
         usrCx.loggedIn = true;
-        alert ("updated context in login dialog"); 
+
         this.setState({
             userCtx: usrCx,
         });
+   
+        
+        //Get user Org detail
+        this.updateUserContextWithOrgId(usrCx);
+      
     };
 
 

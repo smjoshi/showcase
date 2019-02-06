@@ -17,11 +17,11 @@ const tiers = [
     imageUrl: ""
   },
   {
-    title: "Manage Product",
+    title: "Product Configuration",
     imageUrl: ""
   },
   {
-    title: "Manage Product Details",
+    title: "Product Documents",
     imageUrl: ""
   }
 ];
@@ -40,7 +40,7 @@ class HomePage extends React.Component {
         <Grid container spacing={40} alignItems="flex-end">
           {tiers.map(tier =>(
             <Grid key={tier.title} xs={12} sm={12} md={4}>
-              <HomeCard />
+              <HomeCard header={tier.title} section={tier.title} />
             </Grid>
           ))};
         </Grid>

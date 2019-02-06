@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Switch, Route } from 'react-router-dom'
 import Home from './HomePage'
 import OrgDetail from './OrgDetail'
+import ProductDetail from './ProductDetail'
+import DocumentDetail from './DocumentDetail'
 import LandingPageSlider from './LandingPageSlider';
 
 
@@ -17,6 +19,8 @@ const Main = () => (
       <Route exact path='/' component={LandingPageSlider}/>
       <Route exact path='/home' component={Home}/>
       <Route exact path='/org' component={OrgDetail}/>
+      <Route exact path='/product' component={ProductDetail}/>
+      <Route exact path='/documents' component={DocumentDetail}/>
     </Switch>
   </main>
 )

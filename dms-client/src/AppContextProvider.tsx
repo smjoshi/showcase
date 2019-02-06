@@ -11,7 +11,7 @@ export const AppContext = React.createContext<UserContext>({userInfo: new UserCt
 export const AppcontextConsumer = AppContext.Consumer;
 
 class AppContextProvider extends React.Component{
-
+    
     constructor(props){
         super(props);
         this.updateUserInfo1 = this.updateUserInfo1.bind(this);
@@ -33,5 +33,6 @@ class AppContextProvider extends React.Component{
         </AppContext.Provider>
     }
 }
+AppContextProvider.contextType
 
 export default AppContextProvider;

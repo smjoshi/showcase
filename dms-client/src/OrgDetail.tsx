@@ -7,8 +7,14 @@ import TextField from '@material-ui/core/TextField';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import axios from 'axios';
 import { AppContext } from './AppContextProvider';
+import {Route, Switch} from 'react-router-dom'
+import HomePage from './HomePage';
+import { Typography } from '@material-ui/core';
 
 
+<Switch>
+  <Route  exact path='/home' component={HomePage}/>
+</Switch>
 
 const styles = (theme: Theme ) => createStyles({
     container: {
@@ -52,6 +58,7 @@ class OrgDetail extends React.Component<WithStyles<typeof styles>, {}> {
                 orgs: res.data[0].orgName,
             });
         })
+        
     }
 
     handleNameChange = (event) => {
@@ -124,6 +131,9 @@ class OrgDetail extends React.Component<WithStyles<typeof styles>, {}> {
 
       return (
             <div className="OrgDetail">
+               <Typography variant="title" gutterBottom align="left">
+                    Org Details
+                </Typography>
                 {actionIcon}
 
                {this.state.isAdd && (<div className="OrgForm" >
