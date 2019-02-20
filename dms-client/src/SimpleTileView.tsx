@@ -1,6 +1,8 @@
 import * as React from "react";
-import { createStyles, WithStyles, GridList, withStyles } from "@material-ui/core";
-import SimpleImageDisplay from "./SimpleImageDisplay";
+import { createStyles, WithStyles, GridList, withStyles, GridListTile, GridListTileBar, IconButton } from "@material-ui/core";
+//import SimpleImageDisplay from "./SimpleImageDisplay";
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import axios from 'axios';
 
 
 const styles = theme => createStyles({
@@ -36,7 +38,30 @@ interface State {
 
 
 class SimpleTileView extends React.Component<Props, State>{
-   
+
+    handleFileUpload = (event) => {
+        alert ("File to be uploaded : " + event.target.files[0].name );
+        
+        const form = new FormData();
+        form.append("key", event.target.files[0].name);
+        form.append("file", event.target.files[0]);
+        // form.append("acl" , "public-read");
+        // form.append("X-Amz-Credential", "AKIAIOSFODNN7EXAMPLE/20151229/us-east-1/s3/aws4_request");
+        // form.append("X-Amz-Algorithm" , "AWS4-HMAC-SHA256");
+        // form.append("X-Amz-Date" , "20151229T000000Z");
+
+        axios.post("http://cs-showcase-bucket-raw-dev.s3.amazonaws.com/", form, { headers: {'Content-Type': 'multipart/form-data' }}
+        )
+            .then(res => {
+                alert ("Success image upload");
+            })
+            .catch(function(error){
+                alert("Error while calling API" + error);
+            });
+
+
+
+    }
 
     public render (){
         const { classes } = this.props;
@@ -45,7 +70,25 @@ class SimpleTileView extends React.Component<Props, State>{
             <div>
                 <GridList className={classes.gridList} cols={2.5}>
                     {this.props.productDocuments.map(document => (
-                        <SimpleImageDisplay document={document} />
+                        <GridListTile key={document['url']}>
+                            <img src={document['url']} width="100"></img>
+                            <GridListTileBar
+                                title={document['description']}
+                                classes={{
+                                    root: classes.titleBar,
+                                    title: classes.title,
+                            }}
+                            actionIcon={
+                                <IconButton>
+                                    <StarBorderIcon className={classes.title} />
+                                    upload
+                                    <input type="file" onChange={this.handleFileUpload}></input>
+                                </IconButton>
+                            }
+                            />
+
+                        </GridListTile>
+
                     ))}
                 </GridList>
             </div>
